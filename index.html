@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
   <title>Maintenance Page</title>
   <style>
     body {
@@ -13,45 +13,180 @@
       height: 100vh;
       margin: 0;
     }
+
+    #canvas-container {
+      position: relative;
+    }
+
+    #maintenance-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      color: #000000;
+    }
   </style>
 </head>
 <body>
-  <script>
-    // Your p5.js code goes here
-    let buttonX, buttonY;
-    let buttonSize = 100;
+  <div id="canvas-container">
+    <script>
+let countdonwS = [];
+let CDended = [];
 
-    function setup() {
-      createCanvas(800, 800);
-      buttonX = random(width - buttonSize);
-      buttonY = random(height - buttonSize);
-    }
+let inpTimeButt, inpTime, inpTimeN, inpDiv;
 
-    function draw() {
-      background(255);
+let cnv, startAnim;
 
-      // Draw maintenance message
-      textSize(24);
-      textAlign(CENTER, CENTER);
-      fill(0, 0, 0);
-      text("Website under development", width / 2, height / 2 - 20);
+const bkgColor = [250,250,250];
 
-      // Draw button
-      fill(0, 255, 0);
-      rect(buttonX, buttonY, buttonSize, buttonSize);
+let particles, universo;
 
-      // Check if the mouse is over the button
-      if (
-        mouseX > buttonX &&
-        mouseX < buttonX + buttonSize &&
-        mouseY > buttonY &&
-        mouseY < buttonY + buttonSize
-      ) {
-        // Move the button randomly if the mouse is over it
-        buttonX = random(width - buttonSize);
-        buttonY = random(height - buttonSize);
-      }
-    }
-  </script>
+let maxRatio, maxTimeLeft;
+
+function startStarfieldAnim(){
+	//background(bkgColor);
+
+	startAnim = false;
+
+	universo = new Universo();
+
+	// planet = new Planet();
+
+	for(let i = 0; i < 400; i++){
+		universo.addStar(new Star());
+	}
+
+
+}
+
+function starfieldAnim(ratio){
+
+	background(bkgColor)
+	translate(width/2, height/2);
+
+	if(ratio <= 0) {
+		universo.speedDown();
+	}
+
+	universo.update();
+	universo.draw();
+
+}
+
+class Star {
+	constructor(){
+		this.x = random(-width, width); 
+		this.y = random(-height, height);
+		this.z = random(max(width, height));
+
+		this.pz = this.z;
+
+		this.speed = 25;
+	}
+
+	move(){
+		if(this.z < this.speed){
+			this.z = max(width, height);
+			this.x = random(-width, width); 
+			this.y = random(-height, height);
+
+			this.pz = this.z;
+
+		} else {
+			this.z -= this.speed;
+
+		}
+
+	}
+
+	draw(){
+
+    let sx =  map(this.x/this.z, 0, 1, 0, width);
+		let sy =  map(this.y/this.z, 0, 1, 0, height);
+
+		let px =  map(this.x/this.pz, 0, 1, 0, width);
+		let py =  map(this.y/this.pz, 0, 1, 0, height);
+
+		this.pz = this.z;
+
+		stroke(150);
+    strokeWeight(2);
+		line(px, py, sx, sy);
+
+	}
+}
+
+class Universo {
+	constructor() {
+		this.stars = [];
+	}
+
+	addStar(star){
+		this.stars.push(star);
+	}
+
+	draw(){
+		for(let i=0; i < this.stars.length; i++){
+			this.stars[i].draw();
+		}
+	}
+
+	update(){
+		for(let i=0; i < this.stars.length; i++){
+			this.stars[i].move();
+		}
+	}
+
+	speedUp(ratio){
+		for(let i=0; i < this.stars.length; i++){
+				//this.stars[i].speed *= 1.5;
+				this.stars[i].speed = map(ratio, 0,1,2,100);
+				this.stars[i].maxR = map(ratio, 0,1,0,18);
+			}
+		}
+
+	speedDown(){
+		for(let i=0; i < this.stars.length; i++){
+			this.stars[i].speed *= .9;
+		}	
+	}
+}
+
+function setup() {
+	// put setup code here
+	cnv = createCanvas(windowWidth, windowHeight)
+	cnv.position(0,0);
+	cnv.style('z-index', '-2');
+
+	startAnim = true;
+
+	frameRate(30);
+	document.body.style.backgroundColor = color(bkgColor);
+	maxRatio = 61;
+
+  startStarfieldAnim();
+
+}
+
+function draw() {
+  starfieldAnim(maxRatio);
+  universo.speedUp(mouseY/height)
+}
+
+
+function windowResized() {
+	resizeCanvas(windowWidth, windowHeight);
+	//bouncingBallAnim(maxRatio);
+	starfieldAnim(maxRatio);
+}
+
+
+ </script>
+  </div>
+  
+  <div id="maintenance-text">
+    Website under development
+  </div>
 </body>
 </html>
